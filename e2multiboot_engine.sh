@@ -1,6 +1,6 @@
 cat << 'EOF' > /usr/bin/e2multiboot_engine.sh
 #!/bin/bash
-# Engine script for AJ Panel Custom Menu - Novaler 4K Pro Multiboot
+# Engine script for AJ Panel Custom Menu - Novaler 4K Pro Multiboot (Up to Slot 9)
 
 ACTION=$1
 PARAM1=$2
@@ -8,7 +8,7 @@ PARAM2=$3
 
 case $ACTION in
     "format_sd")
-        # PARAM1 = total slots requested (e.g. 2 for slot 6 and 7)
+        # PARAM1 = total slots requested (1 to 4)
         SLOTS_COUNT=$PARAM1
         echo "[+] Preparing SD card with GPT for $SLOTS_COUNT external slots..."
         init 4
@@ -21,7 +21,7 @@ case $ACTION in
             [ "$i" -eq 1 ] && START_SIZE="2048s"
             END_SIZE="$(( i * 3000 ))MiB"
             
-            echo "[+] Creating Partition for Slot $SLOT_NUM ($START_SIZE to $END_SIZE)..."
+            echo "[+] Creating Partition for Slot $SLOT_NUM..."
             parted -s /dev/mmcblk1 mkpart primary ext4 ${START_SIZE} ${END_SIZE}
         done
         
@@ -39,7 +39,7 @@ case $ACTION in
         ;;
 
     "install_image")
-        # PARAM1 = Slot Number (6 or 7)
+        # PARAM1 = Slot Number (6, 7, 8, or 9)
         # PARAM2 = Image ZIP path
         SLOT_NUM=$PARAM1
         ZIP_PATH=$PARAM2
@@ -70,3 +70,4 @@ esac
 EOF
 
 chmod +x /usr/bin/e2multiboot_engine.sh
+

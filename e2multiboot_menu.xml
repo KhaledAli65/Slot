@@ -1,31 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<menu title="Novaler External MultiBoot Manager">
+<menu title="Novaler External MultiBoot Manager (Slots 6-9)">
 
-    <!-- قسم تهيئة كارت الميموري -->
-    <item name="1. Format SD Card for Slot 6 &amp; Slot 7 (GPT)" type="cmd">
+    <!-- قسم التهيئة -->
+    <item name="1. Format SD Card for Slots 6 to 9 (4 Slots - GPT)" type="cmd">
+        <cmd>/usr/bin/e2multiboot_engine.sh format_sd 4</cmd>
+    </item>
+    <item name="2. Format SD Card for Slots 6 to 7 (2 Slots - GPT)" type="cmd">
         <cmd>/usr/bin/e2multiboot_engine.sh format_sd 2</cmd>
     </item>
 
-    <item name="2. Format SD Card for Slot 6 Only (GPT)" type="cmd">
-        <cmd>/usr/bin/e2multiboot_engine.sh format_sd 1</cmd>
-    </item>
-
-    <!-- قسم تثبيت الصور من /media/hdd/images/ -->
+    <!-- قسم تثبيت الصور -->
     <item name="3. Install Image to Slot 6" type="file_picker" path="/media/hdd/images" filter="*.zip">
         <cmd>/usr/bin/e2multiboot_engine.sh install_image 6 %FILE%</cmd>
     </item>
-
     <item name="4. Install Image to Slot 7" type="file_picker" path="/media/hdd/images" filter="*.zip">
         <cmd>/usr/bin/e2multiboot_engine.sh install_image 7 %FILE%</cmd>
     </item>
-
-    <!-- الإقلاع المباشر للسلوتات -->
-    <item name="5. Reboot to Slot 6" type="cmd">
-        <cmd>echo "STARTUP_LINUX_6" > /boot/STARTUP &amp;&amp; reboot</cmd>
+    <item name="5. Install Image to Slot 8" type="file_picker" path="/media/hdd/images" filter="*.zip">
+        <cmd>/usr/bin/e2multiboot_engine.sh install_image 8 %FILE%</cmd>
+    </item>
+    <item name="6. Install Image to Slot 9" type="file_picker" path="/media/hdd/images" filter="*.zip">
+        <cmd>/usr/bin/e2multiboot_engine.sh install_image 9 %FILE%</cmd>
     </item>
 
-    <item name="6. Reboot to Slot 7" type="cmd">
+    <!-- قسم الإقلاع -->
+    <item name="7. Reboot to Slot 6" type="cmd">
+        <cmd>echo "STARTUP_LINUX_6" > /boot/STARTUP &amp;&amp; reboot</cmd>
+    </item>
+    <item name="8. Reboot to Slot 7" type="cmd">
         <cmd>echo "STARTUP_LINUX_7" > /boot/STARTUP &amp;&amp; reboot</cmd>
+    </item>
+    <item name="9. Reboot to Slot 8" type="cmd">
+        <cmd>echo "STARTUP_LINUX_8" > /boot/STARTUP &amp;&amp; reboot</cmd>
+    </item>
+    <item name="10. Reboot to Slot 9" type="cmd">
+        <cmd>echo "STARTUP_LINUX_9" > /boot/STARTUP &amp;&amp; reboot</cmd>
     </item>
 
 </menu>
+
