@@ -1,0 +1,73 @@
+name: Auto-Generate OPKG Feed (Packages & Packages.gz)
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'اسم التاج (مثال: v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine Release Tag
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download .ipk assets from Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ipk_work
+          cd ipk_work
+          gh release download "${{ steps.get_tag.outputs.TAG }}" --repo "${{ github.repository }}" --pattern "*.ipk" || true
+
+      - name: Generate Packages and Packages.gz
+        run: |
+          cd ipk_work
+          > Packages
+          
+          for f in *.ipk; do
+              [ -e "$f" ] || continue
+              echo "Processing $f..."
+              
+              # فك ضغط بيانات control سواء كانت الحزمة بصيغة ar أو tar
+              if ar -p "$f" control.tar.gz > control.tar.gz 2>/dev/null; then
+                  tar -xzOf control.tar.gz ./control >> Packages 2>/dev/null || tar -xzOf control.tar.gz control >> Packages
+              elif ar -p "$f" control.tar.xz > control.tar.xz 2>/dev/null; then
+                  tar -xJOf control.tar.xz ./control >> Packages 2>/dev/null || tar -xJOf control.tar.xz control >> Packages
+              elif tar -xOf "$f" ./control.tar.gz > control.tar.gz 2>/dev/null; then
+                  tar -xzOf control.tar.gz ./control >> Packages 2>/dev/null || tar -xzOf control.tar.gz control >> Packages
+              fi
+              rm -f control.tar.gz control.tar.xz
+              
+              # التأكد من وجود سطر جديد قبل إضافة بيانات الملف
+              sed -i -e '$a\' Packages 2>/dev/null || echo "" >> Packages
+              
+              echo "Filename: $f" >> Packages
+              echo "Size: $(wc -c < "$f" | tr -d ' ')" >> Packages
+              echo "SHA256sum: $(sha256sum "$f" | awk '{print $1}')" >> Packages
+              echo "" >> Packages
+          done
+          
+          # ضغط الملف لإنتاج Packages.gz
+          gzip -kf Packages
+          ls -lh Packages Packages.gz
+
+      - name: Upload Packages and Packages.gz to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ steps.get_tag.outputs.TAG }}" ipk_work/Packages ipk_work/Packages.gz --repo "${{ github.repository }}" --clobber
