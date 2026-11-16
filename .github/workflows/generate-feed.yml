@@ -52,8 +52,8 @@ jobs:
               fi
               rm -f control.tar.gz control.tar.xz
               
-              # تحويل القسم من extensions أو غيره إلى قسم مستقل khaledalipluginfeed
-              sed -i 's/^Package: enigma2-plugin-[^-]*-/Package: enigma2-plugin-khaledalipluginfeed-/g' tmp_control
+              # تنظيم اسم الحزمة لتظهر بشكل منظم ومرتب تحت قسم extensions
+              sed -i 's/^Package: enigma2-plugin-[^-]*-/Package: enigma2-plugin-extensions-khaledali-/g' tmp_control
               
               cat tmp_control >> Packages
               rm -f tmp_control
