@@ -43,17 +43,21 @@ jobs:
               [ -e "$f" ] || continue
               echo "Processing $f..."
               
-              # فك ضغط بيانات control سواء كانت الحزمة بصيغة ar أو tar
               if ar -p "$f" control.tar.gz > control.tar.gz 2>/dev/null; then
-                  tar -xzOf control.tar.gz ./control >> Packages 2>/dev/null || tar -xzOf control.tar.gz control >> Packages
+                  tar -xzOf control.tar.gz ./control > tmp_control 2>/dev/null || tar -xzOf control.tar.gz control > tmp_control
               elif ar -p "$f" control.tar.xz > control.tar.xz 2>/dev/null; then
-                  tar -xJOf control.tar.xz ./control >> Packages 2>/dev/null || tar -xJOf control.tar.xz control >> Packages
+                  tar -xJOf control.tar.xz ./control > tmp_control 2>/dev/null || tar -xJOf control.tar.xz control > tmp_control
               elif tar -xOf "$f" ./control.tar.gz > control.tar.gz 2>/dev/null; then
-                  tar -xzOf control.tar.gz ./control >> Packages 2>/dev/null || tar -xzOf control.tar.gz control >> Packages
+                  tar -xzOf control.tar.gz ./control > tmp_control 2>/dev/null || tar -xzOf control.tar.gz control > tmp_control
               fi
               rm -f control.tar.gz control.tar.xz
               
-              # التأكد من وجود سطر جديد قبل إضافة بيانات الملف
+              # تحويل القسم من extensions أو غيره إلى قسم مستقل khaledalipluginfeed
+              sed -i 's/^Package: enigma2-plugin-[^-]*-/Package: enigma2-plugin-khaledalipluginfeed-/g' tmp_control
+              
+              cat tmp_control >> Packages
+              rm -f tmp_control
+              
               sed -i -e '$a\' Packages 2>/dev/null || echo "" >> Packages
               
               echo "Filename: $f" >> Packages
@@ -62,7 +66,6 @@ jobs:
               echo "" >> Packages
           done
           
-          # ضغط الملف لإنتاج Packages.gz
           gzip -kf Packages
           ls -lh Packages Packages.gz
 
